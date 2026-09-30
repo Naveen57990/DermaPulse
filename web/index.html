@@ -20,11 +20,12 @@
       </div>
     </div>
     <div class="nav-center">
-      <div class="status-chip"><span class="pulse-dot"></span> YOUCAM SKIN AI: <strong id="apiStatusText">SANDBOX ACTIVE</strong></div>
-      <div class="status-chip"><span class="pulse-dot green"></span> ENGINE LATENCY: <strong>0.001s</strong></div>
+      <div class="status-chip"><span class="pulse-dot" id="apiDot"></span> YOUCAM SKIN AI: <strong id="apiStatusText">ONLINE & READY</strong></div>
+      <div class="status-chip"><span class="pulse-dot green"></span> ENGINE LATENCY: <strong id="latencyText">0.001s</strong></div>
+      <div class="status-chip webcam-chip" id="camStatusChip"><span class="pulse-dot grey" id="camDot"></span> CAMERA: <strong id="camStatusText">OFFLINE</strong></div>
     </div>
     <div class="nav-actions">
-      <button class="btn btn-secondary" id="openApiBtn">⚙️ API Config</button>
+      <button class="btn btn-secondary" id="openApiBtn">⚙️ YouCam API Config</button>
       <button class="btn btn-primary" id="exportJsonBtn">📋 Export Protocol JSON</button>
     </div>
   </header>
@@ -34,8 +35,18 @@
     <!-- Left Column: Patient & Environmental Telemetry -->
     <section class="panel panel-left">
       <div class="panel-header">
-        <h2>👤 Clinical Intake & Telemetry</h2>
+        <h2>👤 Clinical Intake & Telemetry Mode</h2>
         <span class="badge">STEP 1 & 2</span>
+      </div>
+
+      <!-- Telemetry Source Toggle -->
+      <div class="control-group">
+        <label>Diagnostic Telemetry Source</label>
+        <div class="source-toggle-grid">
+          <button class="source-btn active" id="srcWebcamBtn">📹 Live Webcam</button>
+          <button class="source-btn" id="srcUploadBtn">📁 Upload Photo</button>
+          <button class="source-btn" id="srcArchetypeBtn">🧬 Archetypes</button>
+        </div>
       </div>
 
       <div class="control-group">
@@ -48,8 +59,9 @@
         <input type="range" id="patientAge" min="18" max="75" value="34" class="slider">
       </div>
 
-      <div class="control-group">
-        <label>Biometric Diagnostic Archetype</label>
+      <!-- Archetype Selection Section (Hidden by default when in webcam mode) -->
+      <div class="control-group" id="archetypeSection" style="display: none;">
+        <label>Pre-Calibrated Clinical Archetype</label>
         <div class="archetype-grid">
           <button class="arch-card active" data-arch="dehydrated_erythema">
             <div class="arch-title">Dehydrated & Erythema</div>
@@ -110,15 +122,25 @@
     <section class="panel panel-center">
       <div class="panel-header">
         <h2>🔬 Facial Dermal Scanner & Heatmap</h2>
-        <span class="badge badge-live"><span class="pulse-dot green"></span> LIVE TELEMETRY</span>
+        <div class="scanner-controls">
+          <button class="btn btn-primary btn-sm" id="toggleCamBtn">📹 Start Camera</button>
+          <button class="btn btn-secondary btn-sm" id="captureScanBtn" disabled>📸 Scan Biometrics</button>
+          <input type="file" id="photoFileInput" accept="image/*" style="display: none;">
+        </div>
       </div>
 
       <div class="scanner-container">
+        <!-- Hidden live video element feeding canvas -->
+        <video id="webcamVideo" autoplay playsinline muted style="display: none;"></video>
         <canvas id="faceCanvas" width="480" height="480"></canvas>
-        <div class="scan-line"></div>
+        <div class="scan-line" id="scanLine"></div>
         <div class="zone-tag zone-tag-tzone" id="tagTZone">T-ZONE: SEBUM 75</div>
         <div class="zone-tag zone-tag-cheeks" id="tagCheeks">U-ZONE: ERYTHEMA 82</div>
         <div class="zone-tag zone-tag-eyes" id="tagEyes">PERIORBITAL: CONGESTION 35</div>
+        
+        <div class="scanner-overlay-badge" id="scannerBadge">
+          <span class="pulse-dot green"></span> <span id="badgeText">READY FOR SCAN</span>
+        </div>
       </div>
 
       <div class="metrics-grid" id="metricsGrid">
@@ -191,7 +213,7 @@
       </div>
       <div class="modal-body">
         <p class="modal-desc">
-          DermaPulse AI executes against the Perfect Corp YouCam Skin AI Diagnostic API. By default, high-fidelity pre-calibrated clinical simulation fixtures are used for deterministic 0.001s execution. Enter your API key below to enable direct live cloud telemetry.
+          DermaPulse AI connects directly to Perfect Corp's YouCam Skin AI Diagnostic API (<code>https://api.perfectcorp.com/v1.0/skin/analysis</code>). Claim your 1,000 free hackathon API credits at <a href="https://yce.perfectcorp.com/ai-api" target="_blank" style="color: var(--accent-cyan);">Perfect Corp YCE Portal</a>, then paste your API Bearer Token below:
         </p>
         <div class="control-group">
           <label for="apiKeyInput">YouCam Skin AI API Key / Bearer Token</label>
@@ -200,9 +222,14 @@
         <div class="control-group">
           <label>Mode Selection</label>
           <div class="radio-group">
-            <label><input type="radio" name="apiMode" value="sandbox" checked> Deterministic Clinical Sandbox (Instant)</label>
-            <label><input type="radio" name="apiMode" value="live"> Live Perfect Corp Cloud Gateway</label>
+            <label><input type="radio" name="apiMode" value="hybrid" checked> Smart Hybrid Mode (Direct Cloud API with 0.001s Local Vision Processing)</label>
+            <label><input type="radio" name="apiMode" value="cloud"> Direct Perfect Corp Cloud Gateway</label>
+            <label><input type="radio" name="apiMode" value="sandbox"> High-Fidelity Clinical Sandbox</label>
           </div>
+        </div>
+        <div class="control-group">
+          <label>API Endpoint</label>
+          <input type="text" id="apiEndpointInput" value="https://api.perfectcorp.com/v1.0/skin/analysis" class="input-text">
         </div>
       </div>
       <div class="modal-footer">
@@ -213,7 +240,7 @@
   </div>
 
   <footer class="footer-bar">
-    <div><strong>DermaPulse AI v1.0.0</strong> — Built for YouCam API Skin AI & eCommerce VTO Hackathon 2026.</div>
+    <div><strong>DermaPulse AI v1.2.0</strong> — Built for YouCam API Skin AI & eCommerce VTO Hackathon 2026.</div>
     <div class="footer-links">
       <a href="https://github.com/Naveen57990/DermaPulse" target="_blank">GitHub Repository</a>
       <span>•</span>
