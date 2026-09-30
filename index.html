@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DermaPulse AI — Clinical Dermal Biometrics & Circadian Regimen Engine</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Header / Navigation -->
+  <header class="top-nav">
+    <div class="nav-brand">
+      <img src="assets/logo.jpg" alt="DermaPulse AI" class="brand-logo">
+      <div>
+        <div class="brand-title">DERMAPULSE <span>AI</span></div>
+        <div class="brand-sub">Clinical Dermal Biometrics & Formulation Engine</div>
+      </div>
+    </div>
+    <div class="nav-center">
+      <div class="status-chip"><span class="pulse-dot"></span> YOUCAM SKIN AI: <strong id="apiStatusText">SANDBOX ACTIVE</strong></div>
+      <div class="status-chip"><span class="pulse-dot green"></span> ENGINE LATENCY: <strong>0.001s</strong></div>
+    </div>
+    <div class="nav-actions">
+      <button class="btn btn-secondary" id="openApiBtn">⚙️ API Config</button>
+      <button class="btn btn-primary" id="exportJsonBtn">📋 Export Protocol JSON</button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="dashboard-grid">
+    <!-- Left Column: Patient & Environmental Telemetry -->
+    <section class="panel panel-left">
+      <div class="panel-header">
+        <h2>👤 Clinical Intake & Telemetry</h2>
+        <span class="badge">STEP 1 & 2</span>
+      </div>
+
+      <div class="control-group">
+        <label for="patientName">Patient / Subject Identifier</label>
+        <input type="text" id="patientName" value="Elena Rostova (DX-4890)" class="input-text">
+      </div>
+
+      <div class="control-group">
+        <label for="patientAge">Chronological Age: <span id="ageVal" class="val-highlight">34 yrs</span></label>
+        <input type="range" id="patientAge" min="18" max="75" value="34" class="slider">
+      </div>
+
+      <div class="control-group">
+        <label>Biometric Diagnostic Archetype</label>
+        <div class="archetype-grid">
+          <button class="arch-card active" data-arch="dehydrated_erythema">
+            <div class="arch-title">Dehydrated & Erythema</div>
+            <div class="arch-desc">Stratum Corneum TEWL & Vascular Flush</div>
+          </button>
+          <button class="arch-card" data-arch="photo_damaged_aging">
+            <div class="arch-title">Solar Elastosis</div>
+            <div class="arch-desc">Collagen Depletion & Hyperpigmentation</div>
+          </button>
+          <button class="arch-card" data-arch="hyper_sebaceous_acne">
+            <div class="arch-title">Hyper-Sebaceous</div>
+            <div class="arch-desc">Micro-Comedonal & Lipid Overproduction</div>
+          </button>
+          <button class="arch-card" data-arch="reactive_rosacea">
+            <div class="arch-title">Reactive Rosacea</div>
+            <div class="arch-desc">Neuro-Vascular Telangiectasia</div>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel-divider"></div>
+
+      <div class="panel-header">
+        <h3>🌍 Real-Time Environmental Factors</h3>
+        <span class="badge badge-accent">CIRCADIAN INPUT</span>
+      </div>
+
+      <div class="control-group">
+        <div class="slider-header">
+          <label for="uvSlider">Solar UV Index</label>
+          <span id="uvVal" class="val-highlight">UV 7.5 (High)</span>
+        </div>
+        <input type="range" id="uvSlider" min="0" max="12" step="0.5" value="7.5" class="slider">
+      </div>
+
+      <div class="control-group">
+        <div class="slider-header">
+          <label for="humiditySlider">Ambient Humidity</label>
+          <span id="humidityVal" class="val-highlight">28% (Arid)</span>
+        </div>
+        <input type="range" id="humiditySlider" min="10" max="95" step="1" value="28" class="slider">
+      </div>
+
+      <div class="control-group">
+        <div class="slider-header">
+          <label for="aqiSlider">Air Quality Index (AQI)</label>
+          <span id="aqiVal" class="val-highlight">AQI 115 (Unhealthy)</span>
+        </div>
+        <input type="range" id="aqiSlider" min="10" max="300" step="5" value="115" class="slider">
+      </div>
+
+      <div class="env-summary-box" id="envSummaryBox">
+        🛡️ High solar irradiance requires Mineral ZnO SPF 50+. Low humidity (<40%) engages Squalane occlusive shield.
+      </div>
+    </section>
+
+    <!-- Center Column: Biometric Facial Scanner & Dermal Heatmap -->
+    <section class="panel panel-center">
+      <div class="panel-header">
+        <h2>🔬 Facial Dermal Scanner & Heatmap</h2>
+        <span class="badge badge-live"><span class="pulse-dot green"></span> LIVE TELEMETRY</span>
+      </div>
+
+      <div class="scanner-container">
+        <canvas id="faceCanvas" width="480" height="480"></canvas>
+        <div class="scan-line"></div>
+        <div class="zone-tag zone-tag-tzone" id="tagTZone">T-ZONE: SEBUM 75</div>
+        <div class="zone-tag zone-tag-cheeks" id="tagCheeks">U-ZONE: ERYTHEMA 82</div>
+        <div class="zone-tag zone-tag-eyes" id="tagEyes">PERIORBITAL: CONGESTION 35</div>
+      </div>
+
+      <div class="metrics-grid" id="metricsGrid">
+        <!-- Dynamically rendered 7 skin vectors -->
+      </div>
+    </section>
+
+    <!-- Right Column: Barrier Score, Active Matrix & Circadian Regimen -->
+    <section class="panel panel-right">
+      <div class="panel-header">
+        <h2>🧬 Biometric Diagnosis & Protocol</h2>
+        <span class="badge badge-success">PRESCRIPTION READY</span>
+      </div>
+
+      <!-- Score Bar & Skin Age -->
+      <div class="score-card-grid">
+        <div class="score-card">
+          <div class="score-label">Barrier Integrity Index</div>
+          <div class="score-number" id="barrierScore">38.2<span class="score-unit">/100</span></div>
+          <div class="score-status compromised" id="barrierStatus">COMPROMISED BARRIER</div>
+        </div>
+        <div class="score-card">
+          <div class="score-label">Biological Skin Age</div>
+          <div class="score-number" id="skinAgeDisplay">37 <span class="score-unit">yrs</span></div>
+          <div class="score-status elevated" id="skinAgeStatus">+3 yrs Accelerated</div>
+        </div>
+      </div>
+
+      <!-- Active Ingredients Matrix -->
+      <div class="section-title">
+        <h4>Targeted Active Formulation Matrix</h4>
+        <span class="chip-count" id="activeCount">3 Actives</span>
+      </div>
+      <div class="actives-list" id="activesList">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Contraindicated Safety Gate -->
+      <div class="section-title warning-title">
+        <h4>🚫 Clinical Safety Contraindications</h4>
+        <span class="chip-count chip-warn" id="contraCount">2 Blocked</span>
+      </div>
+      <div class="contra-list" id="contraList">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Circadian AM / PM Protocol -->
+      <div class="section-title">
+        <h4>☀️ AM Photoprotective Shield</h4>
+      </div>
+      <div class="regimen-steps" id="amSteps">
+        <!-- AM Steps -->
+      </div>
+
+      <div class="section-title">
+        <h4>🌙 PM Cellular Lipid Repair</h4>
+      </div>
+      <div class="regimen-steps" id="pmSteps">
+        <!-- PM Steps -->
+      </div>
+    </section>
+  </main>
+
+  <!-- API Key Modal Drawer -->
+  <div class="modal-backdrop" id="apiModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Perfect Corp / YouCam API Credentials</h3>
+        <button class="modal-close" id="closeApiBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc">
+          DermaPulse AI executes against the Perfect Corp YouCam Skin AI Diagnostic API. By default, high-fidelity pre-calibrated clinical simulation fixtures are used for deterministic 0.001s execution. Enter your API key below to enable direct live cloud telemetry.
+        </p>
+        <div class="control-group">
+          <label for="apiKeyInput">YouCam Skin AI API Key / Bearer Token</label>
+          <input type="password" id="apiKeyInput" placeholder="yc_live_xxxxxxxxxxxxxxxx" class="input-text">
+        </div>
+        <div class="control-group">
+          <label>Mode Selection</label>
+          <div class="radio-group">
+            <label><input type="radio" name="apiMode" value="sandbox" checked> Deterministic Clinical Sandbox (Instant)</label>
+            <label><input type="radio" name="apiMode" value="live"> Live Perfect Corp Cloud Gateway</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancelApiBtn">Cancel</button>
+        <button class="btn btn-primary" id="saveApiBtn">Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer-bar">
+    <div><strong>DermaPulse AI v1.0.0</strong> — Built for YouCam API Skin AI & eCommerce VTO Hackathon 2026.</div>
+    <div class="footer-links">
+      <a href="https://github.com/Naveen57990/DermaPulse" target="_blank">GitHub Repository</a>
+      <span>•</span>
+      <a href="https://devpost.com/software/dermapulse-ai" target="_blank">Devpost Project</a>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
